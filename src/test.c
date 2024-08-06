@@ -2,19 +2,28 @@
 #include "rbtree.c"
 #include "stdio.h"
 
-void test_insert_single(const key_t key) {
-  rbtree *t = new_rbtree();
-  node_t *p = rbtree_insert(t, key);
-  node_t *z = rbtree_insert(t, key+1);
-  node_t *x = rbtree_insert(t, key+2);
-  printf("%d\n", t->root->key);
-  printf("%d\n", t->root->left->key);
-  printf("%d\n", t->root->right->key);
-
-  delete_rbtree(t);
+void test_find_single(rbtree *t, const key_t key) {
+  node_t *q = rbtree_find(t, key);
+  if (q != NULL){
+    printf("GOOOOOOOOD\n");
+  }else{
+    printf("BBBBAAAADDDD\n");
+  }
 }
 
+void test_insert_single(rbtree *t, const key_t key) {
+  
+  node_t *p = rbtree_insert(t, key);
+}
+
+
 int main(){
-    test_insert_single(20);
-    printf("SUCCESS");
+    rbtree *t = new_rbtree();
+    test_insert_single(t,20);
+    test_insert_single(t,20+1);
+    test_insert_single(t, 20+2);
+    test_insert_single(t, 1);
+    print_tree(t, t->root); 
+    test_find_single(t,1);
+    printf("SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS");
 }
