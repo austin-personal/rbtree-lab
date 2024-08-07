@@ -187,17 +187,104 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
 }
 
 node_t *rbtree_min(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
+  node_t* cur = t->root;
+  while (cur != t->nil)
+  {
+    if (cur->left !=t->nil){
+      cur = cur->left;
+    }
+  }
+  
+  return cur;
 }
 
 node_t *rbtree_max(const rbtree *t) {
-  // TODO: implement find
-  return t->root;
+  node_t* cur = t->root;
+  while (cur != t->nil)
+  {
+    if (cur->right !=t->nil){
+      cur = cur->right;
+    }
+  }
+  
+  return cur;
 }
 
+
+
+
+
+
+
+
+
+
 int rbtree_erase(rbtree *t, node_t *p) {
-  // TODO: implement erase
+  node_t* succ = NULL;
+  node_t* cur = NULL;
+  color_t color = NULL;
+  color_t delColor = NULL;
+  key_t k = NULL;
+  //1. 자녀가 2개일때
+  if (p->left != t->nil && p->right != t->nil){
+
+    cur = p->right; // 자녀가 두개면 Succ은 오른쪽 subtree안에
+
+    //2. 삭제노드의 자녀가 succ일때 (오른쪽자녀의 왼쪽자녀가 없는 경우)
+    if (p->right->left == t->nil){
+      succ = p->right;
+      p->key = succ -> key;
+      p->left = succ -> right;
+      delColor = succ -> color;
+
+    //2. 삭제 노드가 손자 이하라면 (오른쪽 자녀의 왼쪽자녀가 있는 경우)
+    }else{ 
+      //3. succ의 노드 찾기
+      cur = cur->left;
+      while (cur != t->nil)
+      {
+        succ = cur;
+        cur = cur->left;
+      }
+      //4. succ의 key값을 p에 넣어주고, succ의 color를 삭제 컬러로 등록
+      p->key = succ.key;
+      delColor = succ.color;
+    }
+
+
+  //1. 자녀노드가 하나 이하일때
+  }else{ 
+    // 2. 자녀노드가 없을때
+    if (p->left == t->nil && p->right == t->nil){
+      // 3. 오른쪽에서 왔을때
+      if (p == p->parent->left){
+        p->parent->left = t->nil;
+        delColor = p->color;
+
+      // 3. 왼쪽에서 왔을때
+      }else{ 
+        p->parent->right = t->nil;
+        delColor = p->color;
+      }
+
+
+    // 2. 자녀 노드가 하나일때
+    } else{ 
+      // 3. 왼쪽에만 있을때
+      if (p->left != t->nil){
+        p->key = p->left->key; //key
+        delColor = p->left->color;//delete color
+        p->left = p->right->left;//자식
+        p->right = p->right->right;//자식
+      // 3. 오른쪽에만 있을때
+      }else{ 
+        p->key = p->right->key; //key
+        delColor = p->right->color;//delete color
+        p->left = p->left->left;//자식
+        p->right = p->left->right;//자식
+      } 
+    }
+  }
   return 0;
 }
 
