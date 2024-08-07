@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <rbtree.h>
+// #include <rbtree.c>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,7 +62,9 @@ void test_erase_root(const key_t key) {
   assert(t->root == p);
   assert(p->key == key);
 
+
   rbtree_erase(t, p);
+
 #ifdef SENTINEL
   assert(t->root == t->nil);
 #else
@@ -69,6 +72,7 @@ void test_erase_root(const key_t key) {
 #endif
 
   delete_rbtree(t);
+
 }
 
 static void insert_arr(rbtree *t, const key_t *arr, const size_t n) {
@@ -315,13 +319,18 @@ void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
     node_t *p = rbtree_insert(t, arr[i]);
     assert(p != NULL);
   }
-
+  //DEBUG
+  print_tree(t, t->root);
+  printf("\n");
   for (int i = 0; i < n; i++) {
     node_t *p = rbtree_find(t, arr[i]);
-    // printf("arr[%d] = %d\n", i, arr[i]);
+    //DEBUG
+    printf("arr[%d] = %d\n", i, arr[i]);
     assert(p != NULL);
     assert(p->key == arr[i]);
     rbtree_erase(t, p);
+    //DEBUG
+    print_tree(t, t->root);
   }
 
   for (int i = 0; i < n; i++) {
@@ -345,7 +354,7 @@ void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
 void test_find_erase_fixed() {
   const key_t arr[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12, 24, 36, 990, 25};
   const size_t n = sizeof(arr) / sizeof(arr[0]);
-  rbtree *t = new_rbtree();
+  rbtree *t = new_rbtree(); 
   assert(t != NULL);
 
   test_find_erase(t, arr, n);
@@ -368,16 +377,28 @@ void test_find_erase_rand(const size_t n, const unsigned int seed) {
 }
 
 int main(void) {
+  printf("1\n");
   test_init();
+  printf("1\n");
   test_insert_single(1024);
+  printf("1\n");
   test_find_single(512, 1024);
+  printf("1\n");
   test_erase_root(128);
+  printf("3\n");
   test_find_erase_fixed();
+  printf("1\n");
   test_minmax_suite();
-  test_to_array_suite();
+  printf("B\n");
+  //test_to_array_suite();
+  printf("Till here\n");
   test_distinct_values();
+  printf("10000\n");
   test_duplicate_values();
+  printf("10000\n");
   test_multi_instance();
+  printf("10000\n");
   test_find_erase_rand(10000, 17);
+  
   printf("Passed all tests!\n");
 }

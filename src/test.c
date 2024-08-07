@@ -1,16 +1,24 @@
 #include "rbtree.h"
 #include "rbtree.c"
 #include "stdio.h"
+#include <assert.h>
+
+#define SENTINEL
 
 
-
-void test_minmax_suite() {
-  key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12};
-  const size_t n = sizeof(entries) / sizeof(entries[0]);
-  test_minmax(entries, n);
-}
+void test_insert_single(rbtree* t, const key_t key) {
+  
+  node_t *p = rbtree_insert(t, key);
+  }
 
 int main(){
-    node_t* ans = test_minmax_suite();
-    printf("SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS");
+  rbtree *t = new_rbtree();
+  test_insert_single(t,5);
+  test_insert_single(t,3);
+  test_insert_single(t,7);
+  test_insert_single(t,8);
+  test_insert_single(t,10);
+  print_tree(t,t->root);
+  printf("SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS SUCCESS");
+  delete_rbtree(t);
 }

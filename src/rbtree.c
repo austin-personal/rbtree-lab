@@ -5,8 +5,8 @@
 
 void left_rotate(rbtree *t, node_t * child);
 void right_rotate(rbtree *t, node_t * child);
-
 rbtree *new_rbtree(void) {
+
   rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
   node_t *nil = (node_t *)calloc(1, sizeof(node_t));
   if (p == NULL) {
@@ -23,6 +23,7 @@ rbtree *new_rbtree(void) {
   nil->color = RBTREE_BLACK;
   return p;
 }
+
 void print_tree(rbtree* t, node_t* node){
   if (node == t->nil){
     return;
@@ -32,6 +33,7 @@ void print_tree(rbtree* t, node_t* node){
   print_tree(t, node->right);
   
 }
+
 //Rotate function
 void left_rotate(rbtree *t, node_t * cur) {
   node_t* parent = cur->parent;
@@ -188,11 +190,9 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
 
 node_t *rbtree_min(const rbtree *t) {
   node_t* cur = t->root;
-  while (cur != t->nil)
+  while (cur->left != t->nil)
   {
-    if (cur->left !=t->nil){
-      cur = cur->left;
-    }
+    cur = cur->left;
   }
   
   return cur;
@@ -200,11 +200,11 @@ node_t *rbtree_min(const rbtree *t) {
 
 node_t *rbtree_max(const rbtree *t) {
   node_t* cur = t->root;
-  while (cur != t->nil)
+  while (cur->right!= t->nil)
   {
-    if (cur->right !=t->nil){
-      cur = cur->right;
-    }
+
+    cur = cur->right;
+
   }
   
   return cur;
@@ -214,19 +214,80 @@ node_t *rbtree_max(const rbtree *t) {
 
 
 
-void fix_up(){
-
+void rb_delete_fix_up(rbtree* t, node_t *p){
+  node_t* uncle;
+  while (p !=t->root && p->color == RBTREE_BLACK)
+  { // 왼쪽에서 왔을때
+    if (p == p->parent->left){
+      uncle = p->parent->right;
+      //Case 1
+      if(uncle == RBTREE_RED){
+        uncle->color = RBTREE_BLACK;
+        p->parent->color = RBTREE_RED;
+        left_rotate(t, p->parent);
+        uncle = p->parent->right;
+      }
+      // Case2
+      if(uncle->left->color == RBTREE_BLACK && uncle->right->color == RBTREE_BLACK){
+        uncle->color = RBTREE_RED;
+        p = p->parent; // p의 달린 extra node를 위의 노드로 책임 전가
+      }else{
+        //Case 3
+        if (uncle->right->color == RBTREE_BLACK)
+        {
+          uncle->left->color = RBTREE_BLACK;
+          uncle->color = RBTREE_RED;
+          right_rotate(t,uncle);
+          uncle = p->parent->right;
+        }
+        // Case 4
+        uncle->color = p->parent->color;
+        p->parent->color = RBTREE_BLACK;
+        uncle->right->color = RBTREE_BLACK;
+        left_rotate(t, p->parent);
+        p = t->root;
+      }
+    }else{
+      uncle = p->parent->left;
+      //Case 1
+      if(uncle == RBTREE_RED){
+        uncle->color = RBTREE_BLACK;
+        p->parent->color = RBTREE_RED;
+        right_rotate(t, p->parent);
+        uncle = p->parent->left;
+      }
+      // Case2
+      if(uncle->left->color == RBTREE_BLACK && uncle->right->color == RBTREE_BLACK){
+        uncle->color = RBTREE_RED;
+        p = p->parent; // p의 달린 extra node를 위의 노드로 책임 전가
+      }else{
+        //Case 3
+        if (uncle->left->color == RBTREE_BLACK)
+        {
+          uncle->right->color = RBTREE_BLACK;
+          uncle->color = RBTREE_RED;
+          left_rotate(t, uncle);
+          uncle = p->parent->left;
+        }
+        // Case 4
+        uncle->color = p->parent->color;
+        p->parent->color = RBTREE_BLACK;
+        uncle->left->color = RBTREE_BLACK;
+        right_rotate(t, p->parent);
+        p = t->root;
+      }
+    }
+  }
+  
 }
-
 
 
 
 int rbtree_erase(rbtree *t, node_t *p) {
   node_t* succ = NULL;
   node_t* cur = NULL;
-  color_t color = NULL;
-  color_t delColor = NULL;
-  key_t k = NULL;
+  color_t delColor = RBTREE_BLACK;
+  node_t* tempDel = NULL;
   //1. 자녀가 2개일때
   if (p->left != t->nil && p->right != t->nil){
     cur = p->right; // 자녀가 두개면 Succ은 오른쪽 subtree안에
@@ -248,16 +309,15 @@ int rbtree_erase(rbtree *t, node_t *p) {
       }
       // 4. succ의 key값을 p에 넣어주고, succ의 color를 삭제 컬러로 등록
       // 5. succ의 오른쪽 자녀가 있으면, 접합하기
-      if (succ->right !=t->nil){
-        succ->right->parent = succ->parent;
-      }
+
+      succ->right->parent = succ->parent;
+
       succ->parent->left = succ->right;
       p->key = succ->key;
       delColor = succ->color;
-
+      p = succ->right;
     }
-
-
+    free(succ);
   //1. 자녀노드가 하나 이하일때
   }else{ 
     // 2. 자녀노드가 없을때
@@ -265,6 +325,7 @@ int rbtree_erase(rbtree *t, node_t *p) {
       // 3. root일때
       if (p == t->root){
         t->root = t->nil;
+        free(p);
       }
       // 3. 오른쪽에서 왔을때
       else if (p == p->parent->left){
@@ -277,7 +338,6 @@ int rbtree_erase(rbtree *t, node_t *p) {
         delColor = p->color;
       }
 
-
     // 2. 자녀 노드가 하나일때
     } else{ 
       // 3. 왼쪽에만 있을때
@@ -285,13 +345,14 @@ int rbtree_erase(rbtree *t, node_t *p) {
         p->key = p->left->key; //key
         delColor = p->left->color;//delete color
         p->left = p->left->left;//자식
+        tempDel = p->left;
         p->right = p->left->right;//자식
-        if(p->left != t->nil){ //자식의 부모
-          p->left->parent = p->parent;
+        if(p->left->left != t->nil){ //자식의 부모
+          p->left->left->parent = p;
         }
-        if (p->right != t->nil)
+        if (p->left->right != t->nil)
         {
-          p->right->parent = p->parent;
+          p->right->right->parent = p->parent;
         }
 
       // 3. 오른쪽에만 있을때
@@ -299,21 +360,31 @@ int rbtree_erase(rbtree *t, node_t *p) {
         p->key = p->right->key; //key
         delColor = p->right->color;//delete color
         p->left = p->right->left;//자식
+        tempDel = p->right;
         p->right = p->right->right;//자식
-        if(p->left != t->nil){ //자식의 부모
-          p->left->parent = p->parent;
+        if(p->right->left != t->nil){ //자식의 부모
+          p->right->left->parent = p;
         }
-        if (p->right != t->nil)
+        if (p->right->right != t->nil)
         {
-          p->right->parent = p->parent;
+          p->right->right->parent = p->parent;
         }
       } 
+      free(tempDel);
     }
+  }
+  if (delColor == RBTREE_BLACK && p != NULL){
+    rb_delete_fix_up(t, p);
   }
   return 0;
 }
+
+
 
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   // TODO: implement to_array
   return 0;
 }
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
