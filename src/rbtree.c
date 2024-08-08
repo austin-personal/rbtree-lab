@@ -311,7 +311,6 @@ int rbtree_erase(rbtree *t, node_t *p) {
       // 5. succ의 오른쪽 자녀가 있으면, 접합하기
 
       succ->right->parent = succ->parent;
-
       succ->parent->left = succ->right;
       p->key = succ->key;
       delColor = succ->color;
@@ -343,7 +342,7 @@ int rbtree_erase(rbtree *t, node_t *p) {
       // 3. 왼쪽에만 있을때
       if (p->left != t->nil){
         p->key = p->left->key; //key
-        delColor = p->left->color;//delete color
+        delColor = p->color;//delete color
         p->left = p->left->left;//자식
         tempDel = p->left;
         p->right = p->left->right;//자식
@@ -352,13 +351,13 @@ int rbtree_erase(rbtree *t, node_t *p) {
         }
         if (p->left->right != t->nil)
         {
-          p->right->right->parent = p->parent;
+          p->left->right->parent = p;
         }
 
       // 3. 오른쪽에만 있을때
       }else{ 
         p->key = p->right->key; //key
-        delColor = p->right->color;//delete color
+        delColor = p->color;//delete color
         p->left = p->right->left;//자식
         tempDel = p->right;
         p->right = p->right->right;//자식
@@ -367,7 +366,7 @@ int rbtree_erase(rbtree *t, node_t *p) {
         }
         if (p->right->right != t->nil)
         {
-          p->right->right->parent = p->parent;
+          p->right->right->parent = p;
         }
       } 
       free(tempDel);
