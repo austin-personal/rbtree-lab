@@ -284,10 +284,10 @@ void rb_delete_fix_up(rbtree* t, node_t *p){
 
 
 int rbtree_erase(rbtree *t, node_t *p) {
-  node_t* succ = NULL;
-  node_t* cur = NULL;
-  color_t delColor = RBTREE_BLACK;
-  node_t* tempDel = NULL;
+  node_t* succ = NULL; //Succ을 담을 노드
+  node_t* cur = NULL; //탐색에 사용되는 노드
+  color_t delColor = RBTREE_BLACK;  //초기화
+  node_t* tempDel = NULL; 
   //1. 자녀가 2개일때
   if (p->left != t->nil && p->right != t->nil){
     cur = p->right; // 자녀가 두개면 Succ은 오른쪽 subtree안에
@@ -340,9 +340,10 @@ int rbtree_erase(rbtree *t, node_t *p) {
     // 2. 자녀 노드가 하나일때
     } else{ 
       // 3. 왼쪽에만 있을때
+       // 이경우에는 노드를 옮겨주는게 더 효율적
       if (p->left != t->nil){
-        p->key = p->left->key; //key
         delColor = p->color;//delete color
+        p->key = p->left->key; //key
         p->left = p->left->left;//자식
         tempDel = p->left;
         p->right = p->left->right;//자식
@@ -353,6 +354,7 @@ int rbtree_erase(rbtree *t, node_t *p) {
         {
           p->left->right->parent = p;
         }
+       
 
       // 3. 오른쪽에만 있을때
       }else{ 
@@ -377,6 +379,14 @@ int rbtree_erase(rbtree *t, node_t *p) {
   }
   return 0;
 }
+
+
+
+
+
+
+
+
 
 
 
